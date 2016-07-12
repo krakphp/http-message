@@ -20,8 +20,12 @@ class AuthorizationHeader
             return null;
         }
 
+        return self::fromString($header[0]);
+    }
+
+    public static function fromString($header) {
         $matches = [];
-        if (!preg_match('/^\s*(\S+)\s+(\S+)/', $header[0], $matches)) {
+        if (!preg_match('/^\s*(\S+)\s+(\S+)/', $header, $matches)) {
             return null;
         }
 

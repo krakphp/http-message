@@ -45,4 +45,52 @@ describe('HttpMessage', function() {
             });
         });
     });
+    describe('AcceptHeader', function() {
+        describe('::fromHttpMessage', function() {
+            beforeEach(function() {
+                $this->req = new Request('GET', '/');
+            });
+            it('returns null if no header is set', function() {
+                $res = HttpMessage\AcceptHeader::fromHttpMessage($this->req);
+                assert($res === null);
+            });
+            it('returns null if header is not formatted properly', function() {
+                $res = HttpMessage\AcceptHeader::fromHttpMessage(
+                    $this->req->withHeader('Accept', '')
+                );
+                assert($res === null);
+            });
+        });
+        describe('::fromString', function() {
+            it('builds the header from the header string', function() {
+                $header = 'text/*;q=0.8, text/html;q=0.8, text/plain';
+                $acc_header = HttpMessage\AcceptHeader::fromString($header);
+                assert($acc_header->getAcceptableContentTypes()[1]->getMediaType() == 'text/html');
+            });
+        });
+        describe('->__toString', function() {
+            it('formats the header into a string', function() {
+                $header = new HttpMessage\AcceptHeader([
+                    new HttpMessage\AcceptHeaderItem('text/*', [
+                        'q' => 0.8
+                    ]),
+                    new HttpMessage\AcceptHeaderItem('text/html', [
+                        'q' => 0.8
+                    ]),
+                    new HttpMessage\AcceptHeaderItem('text/plain', []),
+                ]);
+                assert((string) $header == 'text/*;q=0.8, text/html;q=0.8, text/plain');
+            });
+        });
+        describe('->signHttpMessage', function() {
+            it('signs the message with the auth header value', function() {
+                $header = new HttpMessage\AcceptHeader([
+                    new HttpMessage\AcceptHeaderItem('text/plain', []),
+                ]);
+                $req = new Request('GET', '/');
+                $req = $header->signHttpMessage($req);
+                assert($req->getHeader('Accept')[0] === 'text/plain');
+            });
+        });
+    });
 });
