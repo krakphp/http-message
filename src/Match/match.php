@@ -52,6 +52,11 @@ function routes($routes) {
     };
 }
 
+function route($method, $path, $cmp = CMP_EQ) {
+    return routes([
+        [$method, $path, $cmp]
+    ]);
+}
 
 /** check on the header, if no pattern is provided, this checks if the header
     exists. If the value is provided, it gets the header value and does a

@@ -53,6 +53,12 @@ describe('#routes', function() {
         assert($match($this->req));
     });
 });
+describe('#route', function() {
+    it('matches a single route', function() {
+        $match = match\route('GET', '/api');
+        assert($match($this->req));
+    });
+});
 describe('#header', function() {
     beforeEach(function() {
         $this->req = $this->req->withHeader('Content-Type', 'application/json');
