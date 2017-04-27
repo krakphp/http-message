@@ -8,7 +8,7 @@ class AcceptHeader
 {
     private $items;
 
-    /** $items is an array [AcceptHeaderItem] */
+    /** $items is an array [MediaType\MediaType] */
     public function __construct(array $items) {
         $this->items = $items;
     }
@@ -27,28 +27,9 @@ class AcceptHeader
             return;
         }
 
-        $parts = explode(',', $header);
-        $parts = array_map('trim', $parts);
-
-        $parts = array_reduce($parts, function($acc, $part) {
-            $values = explode(';', $part);
-            $media_range = $values[0];
-            $params = array_reduce(array_slice($values, 1), function($acc, $param) {
-                list($k, $v) = explode('=', $param);
-                $acc[$k] = $v;
-                return $acc;
-            }, []);
-
-            $acc[] = new AcceptHeaderItem($media_range, $params);
-            return $acc;
-        }, []);
-
-        // now we need to sort by priority
-        usort($parts, function($a, $b) {
-            return $a->cmp($b);
-        });
-
-        return new self($parts);
+        $parser = new MediaType\MediaTypeParser();
+        $types = $parser->parseMediaType($header);
+        return new self($types);
     }
 
     public function signHttpMessage(MessageInterface $msg, $header_name = 'Accept') {

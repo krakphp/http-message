@@ -93,4 +93,49 @@ describe('HttpMessage', function() {
             });
         });
     });
+    describe('ContentTypeHeader', function() {
+        describe('::fromHttpMessage', function() {
+            beforeEach(function() {
+                $this->req = new Request('GET', '/');
+            });
+            it('returns null if no header is set', function() {
+                $res = HttpMessage\ContentTypeHeader::fromHttpMessage($this->req);
+                assert($res === null);
+            });
+            it('returns null if header is not formatted properly', function() {
+                $res = HttpMessage\ContentTypeHeader::fromHttpMessage(
+                    $this->req->withHeader('Accept', '')
+                );
+                assert($res === null);
+            });
+        });
+        describe('::fromString', function() {
+            it('builds the header from the header string', function() {
+                $header = 'text/html;q=0.8;a=1';
+                $acc_header = HttpMessage\ContentTypeHeader::fromString($header);
+                assert($acc_header->getContentType()->getMediaType() == 'text/html');
+            });
+        });
+        describe('->__toString', function() {
+            it('formats the header into a string', function() {
+                $header = new HttpMessage\ContentTypeHeader(
+                    new HttpMessage\MediaType\MediaType('text/html', [
+                        'q' => 0.8
+                    ])
+                );
+                assert((string) $header == 'text/html;q=0.8');
+            });
+        });
+        describe('->signHttpMessage', function() {
+            it('signs the message with the auth header value', function() {
+                $header = new HttpMessage\ContentTypeHeader(
+                    new HttpMessage\MediaType\MediaType('application/json', ['charset' => 'UTF-8'])
+                );
+                $req = new Request('GET', '/');
+                $req = $header->signHttpMessage($req);
+                assert($req->getHeader('Content-Type')[0] === 'application/json;charset=UTF-8');
+            });
+        });
+    });
+
 });
